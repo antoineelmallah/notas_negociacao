@@ -3,16 +3,9 @@ import os
 from enum import Enum
 import re
 
-def get_box_positions_between_texts(pdf: pdfquery.PDFQuery, superior, inferior):
-    superior_box = pdf.pq(f'LTTextBoxHorizontal:contains("{superior}")')
-    inferior_box = pdf.pq(f'LTTextBoxHorizontal:contains("{inferior}")')
-    y0 = float(inferior_box.attr('y1'))
-    y1 = float(superior_box.attr('y0'))
-    height = y1 - y0
-    line_height = 24.535
-    lines = int(round(height / line_height, 0))
-    line_height = height / lines
-    return [(0, y0 + (line * line_height), 2000, y0 + ((line + 1) * line_height)) for line in range(lines)]
+
+def get_box_positions_between_texts(pdf: pdfquery.PDFQuery, common_value_field):
+    return [(0.0, float(item.attrib['y0']), 600.0, float(item.attrib['y1'])) for item in pdf.pq(f'LTTextLineHorizontal:contains("{ common_value_field }")')]
 
 
 def read_table(path):
@@ -20,7 +13,7 @@ def read_table(path):
 
     pdf.load()
  
-    limits = get_box_positions_between_texts(pdf, 'Mercado', 'Resumo dos Negócios')
+    limits = get_box_positions_between_texts(pdf, 'BOVESPA')
 
     return [ pdf.pq('LTTextLineHorizontal:overlaps_bbox("%s, %s, %s, %s")' % line).text() for line in limits]
 
@@ -98,7 +91,7 @@ for year in ('2019', '2020', '2021', '2022', '2023'):
     folder = f'./nuinvest/{year}/acoes/'
     for file in os.listdir(folder):
         for trade in [ Trade(extracted) for extracted in read_table(f'{folder}{file}') ]:
-            print(file, ' ==> ', trade)
+            #print(file, ' ==> ', trade)
             stock = Stock(trade.ticker)
             idx = result.index(stock) if stock in result else None
             if idx:
@@ -107,4 +100,4 @@ for year in ('2019', '2020', '2021', '2022', '2023'):
                 result.append(stock)
             stock.addTrade(trade)
 
-#[print(x) for x in result]
+[print(x) for x in result]
