@@ -28,7 +28,6 @@ no_standard_ticker_names = {
 
 def callback(path):
     for trade in [ Trade(extracted, no_standard_ticker_names) for extracted in read_table(path) ]:
-        print(path, '==>',trade)
         stock = Stock(trade.ticker)
         if stock in result:
             stock = result[result.index(stock)]
@@ -39,4 +38,4 @@ def callback(path):
 
 iterate('/home/mallah/Documents/notas_negociacao/ativos', lambda path : path.endswith('acoes'), callback)
 
-#[print((x.ticker, x.average_price)) for x in result]
+[print((x.ticker, x.average_price)) for x in result]
