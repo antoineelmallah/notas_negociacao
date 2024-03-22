@@ -29,7 +29,7 @@ class Trade:
             elif v in no_standard_ticker_names.keys():
                 self.ticker = no_standard_ticker_names[v]
             elif re.fullmatch(r'[A-Z]{4}\d{1,2}F?', v):
-                self.ticker = v
+                self.ticker = v[:-1] if v.endswith('F') else v 
             elif type(n) == int:
                 self.quantity = n
             elif type(n) == float:
@@ -66,6 +66,8 @@ class Stock:
     def average_price(self):
         total_value_purchase = sum([ trade.total for trade in self.trades if trade.operation == Operation.C ])
         qtd_purchase = sum([ trade.quantity for trade in self.trades if trade.operation == Operation.C ])
+        if qtd_purchase == 0:
+            return .0
         average_purchase = total_value_purchase / qtd_purchase
         qtd_sale = sum([ trade.quantity for trade in self.trades if trade.operation == Operation.V ])
         total_value_sale = average_purchase * qtd_sale
